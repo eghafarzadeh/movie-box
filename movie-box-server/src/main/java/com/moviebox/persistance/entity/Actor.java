@@ -25,6 +25,5 @@ public class Actor extends Artist {
     private Date actingStartDate;
 
     @ManyToMany(mappedBy = "actors")
-    Set<Movie> movies;
-
+    private Set<Movie> movies;
 }
