@@ -7,7 +7,9 @@ import com.moviebox.service.inf.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -50,19 +52,26 @@ public class MovieController {
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityModel<MovieModel> addMovie(@Valid @RequestBody MovieModel newMovie) {
-        return movieModelAssembler.toModel(modelConverter.convert(movieService.addMovie(modelConverter.convert(newMovie))));
+    public ResponseEntity<EntityModel<MovieModel>> addMovie(@Valid @RequestBody MovieModel newMovie) {
+        EntityModel<MovieModel> entityModel = movieModelAssembler.toModel(modelConverter.convert(movieService.addMovie(modelConverter.convert(newMovie))));
+        return ResponseEntity
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .body(entityModel);
 
     }
 
     @PutMapping("")
     @ResponseStatus(HttpStatus.OK)
-    public EntityModel<MovieModel> updateMovie(@Valid @RequestBody MovieModel movie) {
-        return movieModelAssembler.toModel(modelConverter.convert(movieService.updateMovie(modelConverter.convert(movie))));
+    public ResponseEntity<EntityModel<MovieModel>> updateMovie(@Valid @RequestBody MovieModel movie) {
+        EntityModel<MovieModel> entityModel = movieModelAssembler.toModel(modelConverter.convert(movieService.updateMovie(modelConverter.convert(movie))));
+        return ResponseEntity
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .body(entityModel);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteMovie(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
         movieService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
