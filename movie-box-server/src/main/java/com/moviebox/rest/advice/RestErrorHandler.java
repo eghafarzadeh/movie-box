@@ -1,7 +1,7 @@
 package com.moviebox.rest.advice;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.moviebox.exception.MovieNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,14 +20,14 @@ import java.util.List;
  * @since 7/1/2020
  */
 @ControllerAdvice
+@Slf4j
 public class RestErrorHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestErrorHandler.class);
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
     public Error methodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        LOGGER.error(ex.getMessage(), ex);
+        log.error(ex.getMessage(), ex);
         BindingResult result = ex.getBindingResult();
         List<FieldError> fieldErrors = result.getFieldErrors();
         return processFieldErrors(fieldErrors);
@@ -40,11 +41,20 @@ public class RestErrorHandler {
         return error;
     }
 
+
+    @ExceptionHandler({MovieNotFoundException.class, EntityNotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public Error handleEntityNotFound(final EntityNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
+        return new Error(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+    }
+
     @ExceptionHandler({Throwable.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public Error handleThrowable(final Throwable ex) {
-        LOGGER.error(ex.getMessage(), ex);
+        log.error(ex.getMessage(), ex);
         return new Error(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
     }
 

@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @DirtiesContext
-class MovieboxApplicationTests {
+class MovieBoxApplicationTests {
     @Autowired
     private MovieController movieController;
 
